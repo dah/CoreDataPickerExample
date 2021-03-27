@@ -10,20 +10,42 @@ import CoreData
 
 struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
-
+    /*
     @FetchRequest(
         sortDescriptors: [NSSortDescriptor(keyPath: \Item.timestamp, ascending: false)],
         animation: .default)
     private var items: FetchedResults<Item>
-    @State private var selection = Item()
+    */
+    @FetchRequest private var items: FetchedResults<Item>
+    @State private var selection: Item
+    
+    init(moc: NSManagedObjectContext) {
+        let fetchRequest: NSFetchRequest<Item> = Item.fetchRequest()
+        fetchRequest.sortDescriptors = [NSSortDescriptor(keyPath: \Item.timestamp, ascending: false)]
+        fetchRequest.predicate = NSPredicate(value: true)
+        self._items = FetchRequest(fetchRequest: fetchRequest)
+        do {
+            let firstItem = try moc.fetch(fetchRequest)
+            if(firstItem.count > 0) {
+                self._selection = State(initialValue: firstItem[0])
+            } else {
+                self._selection = State(initialValue: Item(context: moc))
+                moc.delete(selection)
+            }
+        } catch {
+            fatalError("Init Problem")
+        }
+    }
     
     var body: some View {
         VStack {
-            Picker("Items", selection: $selection) {
-                ForEach(items) { (item: Item) in
-                    Text(item.timestamp!, formatter: itemFormatter).tag(item)
-                }
-            }.padding()
+            if (items.count > 0) {
+                Picker("Items", selection: $selection) {
+                    ForEach(items) { (item: Item) in
+                        Text(item.timestamp!, formatter: itemFormatter).tag(item)
+                    }
+                }.padding()
+            }
             List {
                 ForEach(items) { item in
                     Text("Item at \(item.timestamp!, formatter: itemFormatter)")
@@ -35,7 +57,9 @@ struct ContentView: View {
                     Label("Add Item", systemImage: "plus")
                 }
             }
-            //Text("\(selection.timestamp!, formatter: itemFormatter) was selected.")
+            if (items.count > 0) {
+                Text("Item \(selection.timestamp ?? Date(timeIntervalSince1970: 0), formatter: itemFormatter) is currently selected.").padding()
+            }
         }
     }
 
@@ -45,7 +69,7 @@ struct ContentView: View {
             newItem.timestamp = Date()
             do {
                 try viewContext.save()
-                selection = newItem
+                selection = newItem //This automatically changes your selection when you add a new item.
             } catch {
                 // Replace this implementation with code to handle the error appropriately.
                 // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
@@ -80,6 +104,6 @@ private let itemFormatter: DateFormatter = {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+        ContentView(moc: PersistenceController.preview.container.viewContext).environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
     }
 }

@@ -13,7 +13,7 @@ struct CoreDataPickerExampleApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView(moc: persistenceController.container.viewContext)
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
         }
     }
