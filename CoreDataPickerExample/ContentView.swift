@@ -10,12 +10,6 @@ import CoreData
 
 struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
-    /*
-    @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \Item.timestamp, ascending: false)],
-        animation: .default)
-    private var items: FetchedResults<Item>
-    */
     @FetchRequest private var items: FetchedResults<Item>
     @State private var selection: Item
     
@@ -27,7 +21,7 @@ struct ContentView: View {
         do {
             let firstItem = try moc.fetch(fetchRequest)
             if(firstItem.count > 0) {
-                self._selection = State(initialValue: firstItem[0])
+                self._selection = State(initialValue: firstItem.first!)
             } else {
                 self._selection = State(initialValue: Item(context: moc))
                 moc.delete(selection)
