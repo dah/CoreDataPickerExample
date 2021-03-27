@@ -2,7 +2,7 @@
 Simple app demonstrating how to get a default Core Data app (Xcode 12.4) working with a Picker.
 
 I was struggling to get the selection working with a core data picker and found that the thread
-below helped but did work in the case that the database was empty. 
+below helped, but didn't work in the case that the database was empty. 
 
 https://developer.apple.com/forums/thread/674482
 
