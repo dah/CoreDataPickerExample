@@ -12,21 +12,30 @@ struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
 
     @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \Item.timestamp, ascending: true)],
+        sortDescriptors: [NSSortDescriptor(keyPath: \Item.timestamp, ascending: false)],
         animation: .default)
     private var items: FetchedResults<Item>
-
+    @State private var selection = Item()
+    
     var body: some View {
-        List {
-            ForEach(items) { item in
-                Text("Item at \(item.timestamp!, formatter: itemFormatter)")
+        VStack {
+            Picker("Items", selection: $selection) {
+                ForEach(items) { (item: Item) in
+                    Text(item.timestamp!, formatter: itemFormatter).tag(item)
+                }
+            }.padding()
+            List {
+                ForEach(items) { item in
+                    Text("Item at \(item.timestamp!, formatter: itemFormatter)")
+                }
+                .onDelete(perform: deleteItems)
             }
-            .onDelete(perform: deleteItems)
-        }
-        .toolbar {
-            Button(action: addItem) {
-                Label("Add Item", systemImage: "plus")
+            .toolbar {
+                Button(action: addItem) {
+                    Label("Add Item", systemImage: "plus")
+                }
             }
+            //Text("\(selection.timestamp!, formatter: itemFormatter) was selected.")
         }
     }
 
@@ -34,9 +43,9 @@ struct ContentView: View {
         withAnimation {
             let newItem = Item(context: viewContext)
             newItem.timestamp = Date()
-
             do {
                 try viewContext.save()
+                selection = newItem
             } catch {
                 // Replace this implementation with code to handle the error appropriately.
                 // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
