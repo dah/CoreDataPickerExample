@@ -19,9 +19,9 @@ struct ContentView: View {
         fetchRequest.predicate = NSPredicate(value: true)
         self._items = FetchRequest(fetchRequest: fetchRequest)
         do {
-            let firstItem = try moc.fetch(fetchRequest)
-            if(firstItem.count > 0) {
-                self._selection = State(initialValue: firstItem.first!)
+            let tempItems = try moc.fetch(fetchRequest)
+            if(tempItems.count > 0) {
+                self._selection = State(initialValue: tempItems.first!)
             } else {
                 self._selection = State(initialValue: Item(context: moc))
                 moc.delete(selection)
