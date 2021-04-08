@@ -30,7 +30,7 @@ struct ContentView: View {
             fatalError("Init Problem")
         }
     }
-    
+
     var body: some View {
         VStack {
             if (items.count > 0) {
